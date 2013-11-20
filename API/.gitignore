@@ -1,0 +1,7 @@
+.sass-cache
+bibliworld-API.sublime-project
+node_modules
+.tmp
+/node_modules
+/assets
+bibliworld-API.sublime-workspace

@@ -10,13 +10,12 @@ var port = 3000;
 
 
 var passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy, 
-    BasicStrategy = require('passport-http').BasicStrategy;
+  LocalStrategy = require('passport-local').Strategy,
+  BasicStrategy = require('passport-http').BasicStrategy;
 /*
  * Use Handlebars for templating
  */
 var exphbs = require('express3-handlebars');
-var hbs;
 
 // For gzip compression
 app.use(express.compress());
@@ -24,14 +23,14 @@ app.use(express.compress());
 /*
  * Config for Production and Development
  */
-app.configure(function() {
-  app.use(express.static('public'));
-  app.use(express.cookieParser());
-  //app.use(express.bodyParser());
-  app.use(express.session({ secret: 'bibliworld is super' }));
-  app.use(passport.initialize());
-  app.use(passport.session());
-  app.use(app.router);
+app.configure(function () {
+    app.use(express.static('public'));
+    app.use(express.cookieParser());
+    //app.use(express.bodyParser());
+    app.use(express.session({ secret: 'bibliworld is super' }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(app.router);
 
 });
 
@@ -68,41 +67,44 @@ if (process.env.NODE_ENV === 'production') {
 app.set('view engine', 'handlebars');
 
 
-app.all('*', function(request, response, next){
-  if (!request.get('Origin')) return next();
-  // use "*" here to accept any origin
-  response.header('Access-Control-Allow-Origin', 'http://127.0.0.1:9000');
-  response.header('Access-Control-Allow-Methods', 'GET, POST');
-  response.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
-  response.header('Access-Control-Allow-Credentials', 'true');
-  response.header('Access-Control-Allow-Max-Age', 3600);
-  if ('OPTIONS' == request.method) return response.send(200);
-  next();
+app.all('*', function (request, response, next) {
+    if (!request.get('Origin')) {
+        return next();
+    }
+    // use "*" here to accept any origin
+    response.header('Access-Control-Allow-Origin', 'http://127.0.0.1:9000');
+    response.header('Access-Control-Allow-Methods', 'GET, POST');
+    response.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+    response.header('Access-Control-Allow-Credentials', 'true');
+    response.header('Access-Control-Allow-Max-Age', 3600);
+    if ('OPTIONS' === request.method) {
+        return response.send(200);
+    }
+    next();
 });
 
 
 passport.use(new LocalStrategy({
         usernameField: 'username',
         passwordField: 'password'
-    }, function(username, password, done){
-        return done(null, {id:1});   
+    }, function (username, password, done) {
+        return done(null, {id : 1});
     }
 ));
 
-passport.use(new BasicStrategy(
-  function(username, password, done) {
+passport.use(new BasicStrategy(function (username, password, done) {
     return done(null, true);
-  }
-));
+}));
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
+passport.serializeUser(function (user, done) {
+    done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
+passport.deserializeUser(function (id, done) {
+  /*User.findById(id, function(err, user) {
     done(err, user);
-  });
+  });*/
+    done(null, {id: 1});
 });
 
 
@@ -116,18 +118,19 @@ passport.deserializeUser(function(id, done) {
 });*/
 
 
-app.get('/login',  passport.authenticate('local'), function(request, response, next){
+app.get('/login',  passport.authenticate('local'), function (request, response) {
     request.login(request.query.username, function (err) {
         response.send({
-            realname : "Philou",
+            realname : 'Philou',
             login: request.query.username,
             err : err
-        }); 
+        });
     });
 });
 
-app.get('/logout', function(request, response, next){
-  request.logout();
+app.get('/logout', function (request, response) {
+    request.logout();
+    response.send({});
 });
 
 

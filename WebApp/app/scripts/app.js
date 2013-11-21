@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('webApp', [
+angular.module('webApp', [
   'ngCookies',
   'ngResource',
   'ngSanitize',
@@ -8,17 +8,16 @@ var app = angular.module('webApp', [
   'pascalprecht.translate',
   'LocalStorageModule',
   'config',
-])
-  .config(function ($routeProvider) {
-    $routeProvider
-      .when('/', {
-        templateUrl: 'views/main.html',
-        controller: 'MainCtrl'
-      })
-      .otherwise({
-        redirectTo: '/'
-      });
-  });
+]).config(function ($routeProvider) {
+  $routeProvider
+    .when('/', {
+      templateUrl: 'views/main.html',
+      controller: 'MainCtrl'
+    })
+    .otherwise({
+      redirectTo: '/'
+    });
+});
 
 
 

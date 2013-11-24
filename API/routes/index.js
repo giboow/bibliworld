@@ -5,7 +5,7 @@ module.exports = function (app) {
 	var passport = require('passport');
 
 	app.get('/login',  passport.authenticate('local'), function (request, response) {
-		request.login(request.query.username, function (err) {
+		request.login(request.query.username, function (err, user) {
 			response.send({
 				realname : 'Philou',
 				login: request.query.username,

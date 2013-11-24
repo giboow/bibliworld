@@ -264,7 +264,7 @@ module.exports = function (grunt) {
                 options: {
                     logConcurrentOutput: true
                 },
-                tasks: ['watch', 'nodemon:dev']
+                tasks: ['watch', 'nodemon:dev', 'shell:mongo']
             }
         }
     });
@@ -272,7 +272,6 @@ module.exports = function (grunt) {
     // Register Tasks
     // Workon
     grunt.registerTask('workon', 'Start working on this project.', [
-        'shell:mongo',
         'jshint',
         'sass:dev',
         //'express:dev',

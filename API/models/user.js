@@ -45,14 +45,14 @@ UserSchema.statics.createUser = function (email, password, callback) {
 UserSchema.statics.authenticate = function (email, password, callback) {
     this.findOne({email: email}, function (err, user) {
         if (!user) {
-			return callback(new Error('cannot find user'));
+			return callback('cannot find user');
         }
 
         if (user.password === password) {
 			return callback(null, user);
 		}
         
-        return callback(new Error('invalid password'));
+        return callback('invalid password');
     });
 };
 

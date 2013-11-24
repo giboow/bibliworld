@@ -1,5 +1,7 @@
 .sass-cache
 bibliworld-API.sublime-project
+/data/db/journal/*
+/data
 node_modules
 .tmp
 /node_modules

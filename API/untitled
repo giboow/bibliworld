@@ -1,0 +1,94 @@
+var passport = require('passport'),
+  LocalStrategy = require('passport-local').Strategy,
+  BasicStrategy = require('passport-http').BasicStrategy;
+
+
+var MongoClient = require('mongodb').MongoClient;
+MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db){
+
+});
+
+
+/*
+ * Use Handlebars for templating
+ */
+var exphbs = require('express3-handlebars');
+
+// For gzip compression
+app.use(express.compress());
+
+/*
+ * Config for Production and Development
+ */
+app.configure(function () {
+    app.use(express.static('public'));
+    app.use(express.cookieParser());
+    //app.use(express.bodyParser());
+    app.use(express.session({ secret: 'bibliworld is super' }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(app.router);
+
+});
+
+
+
+
+
+
+passport.use(new LocalStrategy({
+        usernameField: 'username',
+        passwordField: 'password'
+    }, function (username, password, done) {
+        return done(null, {id : 1});
+    }
+));
+
+passport.use(new BasicStrategy(function (username, password, done) {
+    return done(null, true);
+}));
+
+passport.serializeUser(function (user, done) {
+    done(null, user.id);
+});
+
+passport.deserializeUser(function (id, done) {
+  /*User.findById(id, function(err, user) {
+    done(err, user);
+  });*/
+    done(null, {id: 1});
+});
+
+
+
+/*
+ * Routes
+ */
+// Index Page
+/*app.get('/', function(request, response, next) {
+    response.render('index');
+});*/
+
+
+app.get('/login',  passport.authenticate('local'), function (request, response) {
+    request.login(request.query.username, function (err) {
+        response.send({
+            realname : 'Philou',
+            login: request.query.username,
+            err : err
+        });
+    });
+});
+
+app.get('/logout', function (request, response) {
+    request.logout();
+    response.send({});
+});
+
+
+
+/*
+ * Start it up
+ */
+app.listen(process.env.PORT || port);
+console.log('Express started on port ' + port);

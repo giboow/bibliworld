@@ -6,13 +6,17 @@ module.exports = function (grunt) {
     // load all grunt tasks
     require('load-grunt-tasks')(grunt);
 
+    grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-nodemon');
+
     grunt.initConfig({
 
         // Watch Config
         watch: {
-            files: ['views/**/*'],
+            files: ['views/**/*', 'app.js', 'configs/**/*', 'routes/**/*', 'models/**/*'],
             options: {
-                livereload: 1337
+                livereload: 1337,
+                nospawn: true,
             },
             scripts: {
                 files: [
@@ -33,13 +37,22 @@ module.exports = function (grunt) {
                     'assets/images/**/*.{png,jpg,jpeg,webp}'
                 ],
             },
-            express: {
-                files:  [ 'app.js', '!**/node_modules/**', '!Gruntfile.js' ],
-                tasks:  [ 'express:dev' ],
+            // express: {
+            //     files:  [ 'app.js', '!**/node_modules/**', '!Gruntfile.js'],
+            //     tasks:  [ 'express:dev' ],
+            //     options: {
+            //         nospawn: true // Without this option specified express won't be reloaded
+            //     }
+            // },
+        },
+
+        shell: {
+            mongo: {
+                command: 'mongod --dbpath data/db',
                 options: {
-                    nospawn: true // Without this option specified express won't be reloaded
+                    //async: true
                 }
-            },
+            }
         },
 
         // Clean Config
@@ -91,13 +104,10 @@ module.exports = function (grunt) {
         },
 
         // Express Config
-        express: {
-            options: {
-              // Override defaults here
-            },
+        nodemon: {
             dev: {
                 options: {
-                    script: 'app.js'
+                    file: 'app.js'
                 }
             }
         },
@@ -242,24 +252,34 @@ module.exports = function (grunt) {
         },
 
         // Concurrent Config
-        concurrent: {
+        /*concurrent: {
             dist: [
                 'copy:styles',
                 'svgmin',
                 'htmlmin'
             ]
-        },
+        },*/
+        concurrent: {
+            dev: {
+                options: {
+                    logConcurrentOutput: true
+                },
+                tasks: ['watch', 'nodemon:dev']
+            }
+        }
     });
 
     // Register Tasks
     // Workon
     grunt.registerTask('workon', 'Start working on this project.', [
+        'shell:mongo',
         'jshint',
         'sass:dev',
-        'express:dev',
-        'open:site',
-        'open:editor',
-        'watch'
+        //'express:dev',
+        //'open:site',
+        //'open:editor',
+        //'watch'
+        'concurrent:dev',
     ]);
 
 

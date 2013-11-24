@@ -1,24 +1,18 @@
 'use strict';
 var app = angular.module('webApp');
 
-app.service('AuthenticationService',function($resource,$http,CONF,UserService){
+app.service('AuthenticationService',function($resource, Api, UserService){
 	return {
 		login : function(username, password) {
 			if(username && password) {
-				$http.get(
-					CONF.api+'/login',
-					{
-						params : {
-							username: username,
-							password: password,
-						}
-					}
-				).success(
-					function(datas){
+				Api.request(
+					'/login', {
+						username: username,
+						password: password,
+					}, function(datas){
 						UserService.currentUser = datas;
-					}
-				).error(
-					function(){
+						console.log(datas);
+					}, function(){
 
 					}
 				);
@@ -26,12 +20,11 @@ app.service('AuthenticationService',function($resource,$http,CONF,UserService){
 			return;
 		},
 		logout : function(){
-			$http.get(CONF.api+'/logout').success(
-				function(){
+			Api.request(
+				'/logout',
+				{}, function(){
 					UserService.currentUser= null;
-				}
-			).error(
-				function(){
+				}, function(){
 			});
 		}
 	};

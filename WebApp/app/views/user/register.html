@@ -1,0 +1,10 @@
+<div>
+	<form ng-submit="register()">
+		<input type="email" name="email" ng-model="email"/>
+		<input type="password" name="password" ng-model="password"/>
+		<input type="submit" class="btn btn-primary" value="register"/>
+		<div class="error" ng-model="error">
+			{{error}}
+		</div>
+	</form>
+</div>

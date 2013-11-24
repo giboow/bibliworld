@@ -12,8 +12,6 @@ app.service('AuthenticationService',function($resource, Api, UserService){
 					}, function(datas){
 						UserService.currentUser = datas;
 						console.log(datas);
-					}, function(){
-
 					}
 				);
 			}
@@ -22,13 +20,32 @@ app.service('AuthenticationService',function($resource, Api, UserService){
 		logout : function(){
 			Api.request(
 				'/logout',
-				{}, function(){
+				{}, function (){
 					UserService.currentUser= null;
-				}, function(){
-			});
+				}, function (){}
+			);
+		},
+		register : function(email, password, done) {
+			Api.request(
+				'/user/register', {
+					email : email,
+					password : password
+				}, function (datas) {
+					if (typeof done === 'function') {
+						return done(null, datas);
+					}
+				}, function (err) {
+					if (typeof done === 'function') {
+						return done(err, null);
+					}
+				}
+			);
 		}
 	};
 });
+
+
+
 
 app.service('UserService',function(){
 	return {

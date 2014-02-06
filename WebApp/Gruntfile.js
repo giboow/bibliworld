@@ -92,6 +92,12 @@ module.exports = function (grunt) {
         port: 9000,
         // Change this to '0.0.0.0' to access the server from outside.
         hostname: 'localhost',
+        protocol: "http",
+        key: grunt.file.read('server.key').toString(),
+        cert: grunt.file.read('server.crt').toString(),
+        ca: grunt.file.read('ca.crt').toString(),
+        passphrase: 'grunt',
+          
         livereload: 35729
       },
       livereload: {

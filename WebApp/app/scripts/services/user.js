@@ -6,7 +6,7 @@ app.service('AuthenticationService',function($resource, Api, UserService){
 		login : function(username, password) {
 			if(username && password) {
 				Api.request(
-					'/login', {
+					'/test', {
 						username: username,
 						password: password,
 					}, function(datas){

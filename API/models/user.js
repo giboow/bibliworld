@@ -1,14 +1,18 @@
-
 'use strict';
 
 
 var mongoose = require('mongoose'),
-	mongooseTypes = require('mongoose-types');
+	mongooseTypes = require('mongoose-types'),
+    passportLocalMongoose = require('passport-local-mongoose');
 
 mongooseTypes.loadTypes(mongoose, 'email');
 
 
 var UserSchema = new mongoose.Schema({
+	username: {
+		type: String,
+		require: true
+	},
 	email : {
 		type : mongoose.SchemaTypes.Email,
 		unique: true,
@@ -29,8 +33,9 @@ var UserSchema = new mongoose.Schema({
 }, {strict: true});
 
 
-UserSchema.statics.createUser = function (email, password, callback) {
+UserSchema.statics.register = function (username, email, password, callback) {
 	var user = new User({
+		username : username,
 		email: email,
 		password : password
 	});
@@ -42,8 +47,11 @@ UserSchema.statics.createUser = function (email, password, callback) {
 };
 
 
-UserSchema.statics.authenticate = function (email, password, callback) {
-    this.findOne({email: email}, function (err, user) {
+UserSchema.statics.authenticate = function (username, password, callback) {
+    this.model('User').findOne({'username': username}, function (err, user) {
+    	console.log(err);
+
+    	console.log(username);
         if (!user) {
 			return callback('cannot find user');
         }
@@ -57,7 +65,5 @@ UserSchema.statics.authenticate = function (email, password, callback) {
 };
 
 
-var User = mongoose.model('User', UserSchema);
-exports.User = User;
 
-
+var User = module.exports = mongoose.model('User', UserSchema);

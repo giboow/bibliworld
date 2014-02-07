@@ -1,9 +1,10 @@
 'use strict';
 
 
-var mongoose = require('mongoose'),
-	mongooseTypes = require('mongoose-types'),
-    passportLocalMongoose = require('passport-local-mongoose');
+var mongoose = require('mongoose');
+var mongooseTypes = require('mongoose-types');
+var bcrypt = require('bcrypt');
+var SALT_WORK_FACTOR = 10;
 
 mongooseTypes.loadTypes(mongoose, 'email');
 
@@ -32,8 +33,28 @@ var UserSchema = new mongoose.Schema({
     }
 }, {strict: true});
 
+UserSchema.pre('save', function (next) {
+	var user = this;
+	
+	if (!user.isModified('password')) {return next(); }
+
+	bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
+		
+		if (err) {
+			return next(err);
+		}
+		
+		bcrypt.hash(user.password, salt, function (err, hash) {
+			user.password = hash;
+
+			return next();
+		});
+	});
+});
+
 
 UserSchema.statics.register = function (username, email, password, callback) {
+	var User = this.model('User');
 	var user = new User({
 		username : username,
 		email: email,
@@ -49,21 +70,27 @@ UserSchema.statics.register = function (username, email, password, callback) {
 
 UserSchema.statics.authenticate = function (username, password, callback) {
     this.model('User').findOne({'username': username}, function (err, user) {
-    	console.log(err);
-
-    	console.log(username);
         if (!user) {
 			return callback('cannot find user');
         }
 
-        if (user.password === password) {
-			return callback(null, user);
-		}
-        
-        return callback('invalid password');
+        user.comparePassword(password, function(err, isMatch) {
+        	if (err) {
+        		return callback('cannot find user');		
+        	} else {
+        		return callback(null, user);		
+        	}
+        });
     });
 };
 
+UserSchema.methods.comparePassword = function (candidatePassword, callback) {
+    bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
+        
+        if (err) { return callback(err); }
 
+        return callback(null, isMatch);
+    });
+};
 
-var User = module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', UserSchema);

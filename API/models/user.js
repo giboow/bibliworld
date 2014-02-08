@@ -74,12 +74,16 @@ UserSchema.statics.authenticate = function (username, password, callback) {
 			return callback('cannot find user');
         }
 
-        user.comparePassword(password, function(err, isMatch) {
-        	if (err) {
-        		return callback('cannot find user');		
-        	} else {
-        		return callback(null, user);		
-        	}
+        user.comparePassword(password, function (err, isMatch) {
+			if (err) {
+				return callback('Error check password');
+			} else {
+				if (isMatch) {
+					return callback(null, user);
+				} else {
+					return callback('Invalid password');
+				}
+			}
         });
     });
 };

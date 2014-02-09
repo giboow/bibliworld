@@ -9,6 +9,8 @@
     "mongoose": "~3.8.1",
     "mongoose-types": "~1.0.3",
     "bcrypt" : "*",
+    "swagger-node-express" : "*",
+    "cors" : "*",
     "google-books-search": "~0.1.3"
   },
   "devDependencies": {

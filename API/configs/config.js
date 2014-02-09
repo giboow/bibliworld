@@ -3,5 +3,5 @@ var config = {};
 module.exports = config;
 
 config.server = {
-	port : 3000
+	port : 8002
 }

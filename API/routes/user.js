@@ -63,18 +63,33 @@ module.exports = function (app) {
 			throw swagger.errors.invalid('username/password');
 		}
 	};
-	swagger.addGet(userLogin);
+	swagger.addPost(userLogin);
 
-
-	app.get('/logout', function (request, response) {
-		request.session.destroy(function () {
+	var userLogout = {
+		'spec': {
+			description : 'Log into application',
+			path : '/user/logout',
+			method: 'GET',
+			summary : 'Logout from the app',
+			notes : 'Returns an array with session state',
+			type : 'array',
+			nickname : 'userLogout',
+			produces : ['application/json'],
+		},
+		'action': function (req,res) {
+			request.session.destroy(function () {
 			
-			return response.send({
-				error: false,
-				destroy: true
+				return response.send({
+					error: false,
+					destroy: true
+				});
 			});
-		});
-	});
+		}
+	};
+	swagger.addGet(userLogout);
+
+
+	
 
 
 	app.get('/user/register', function (req, res) {

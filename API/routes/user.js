@@ -8,52 +8,59 @@ module.exports = function (app) {
 
 	var userLogin = {
 		'spec': {
-		    description : "Operations about pets",  
-		    path : "/user/login/{username}/{password}",
-		    method: "GET",
-		    summary : "Log into application",
-		    notes : "Return user infos",
-		    //type : "Pet",
-		    nickname : "userLogin",
-		    produces : ["application/json"],
-		    parameters : [
-		    	swagger.pathParam("username", "User name", "string"),
-		    	swagger.pathParam("password", "User password", "string"),
-	    	],
-		    responseMessages : [swagger.errors.invalid('id'), swagger.errors.notFound('pet')]
-	  	},
-	  	'action': function (req, res) {
+			description : 'Log into application',
+			path : '/user/login',
+			method: 'POST',
+			summary : 'Log into app with username/password',
+			notes : 'Returns an array info with id and username infos',
+			type : 'array',
+			nickname : 'userLogin',
+			produces : ['application/json'],
+			parameters : [
+				swagger.queryParam('username', 'User name', 'string', true),
+				swagger.queryParam('password', 'User password', 'string', true),
+			],
+			responseMessages : [
+				swagger.errors.invalid('username'),
+				swagger.errors.invalid('password'),
+				swagger.errors.invalid('username/password')
+			]
+		},
+		'action': function (req, res) {
 			var datas = {error: false};
 
-			var username = req.params.username,
-				password = req.params.password;
-				
+			var username = req.query.username,
+				password = req.query.password;
+
+			if (!username) {
+				throw swagger.errors.invalid('username');
+			}
+			if (!password) {
+				throw swagger.errors.invalid('password');
+			}
+							
 			// test user session
 			var userSession = req.session.user;
 			if (userSession) {
 				datas.sessionCreate = false;
 				datas.user = userSession;
-			
+
 				return res.send(datas);
+			} else {
+				User.authenticate(username, password, function (err, user) {
+					if (!err) {
+						datas.sessionCreate = true;
+						req.session.user = datas.user = {
+							id : user.userid,
+							username : user.username,
+						};
+
+						return res.send(datas);
+					}
+				});
 			}
 
-			User.authenticate(username, password, function (err, user) {
-				if (err) {
-					datas.error = {
-						code : 101,
-						message : 'Invalid User/Pass'
-					};
-				} else {
-					datas.sessionCreate = true;
-					req.session.user = datas.user = {
-						id : user.userid,
-						username : user.username,
-					};
-					
-				}
-			
-				return res.send(datas);
-			});
+			throw swagger.errors.invalid('username/password');
 		}
 	};
 	swagger.addGet(userLogin);

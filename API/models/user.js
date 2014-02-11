@@ -92,13 +92,17 @@ UserSchema.statics.register = function (username, email, password, callback) {
 UserSchema.statics.authenticate = function (username, password, callback) {
     this.model('User').findOne({'username': username}, function (err, user) {
         if (!user) {
-			return callback('cannot find user');
+			return callback({
+				code : 102,
+				message : 'unknow user'
+			});
         }
 
         user.comparePassword(password, function (err, isMatch) {
 			if (err) {
+				console.log(err);
 				return callback({
-					code : 102,
+					code : 103,
 					message : 'Invalid password'
 				});
 			} else {
@@ -106,7 +110,7 @@ UserSchema.statics.authenticate = function (username, password, callback) {
 					return callback(null, user);
 				} else {
 					return callback({
-						code : 101, 
+						code : 101,
 						message : 'Invalid password'
 					});
 				}
@@ -124,11 +128,11 @@ UserSchema.methods.comparePassword = function (candidatePassword, callback) {
     });
 };
 
-UserSchema.methods.toJson = function() {
+UserSchema.methods.toJson = function () {
 	return {
 		username : this.username,
 		email : this.email
-	}
-}
+	};
+};
 
 module.exports = mongoose.model('User', UserSchema);

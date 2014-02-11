@@ -23,7 +23,8 @@ module.exports = function () {
 			responseMessages : [
 				swagger.errors.invalid('username'),
 				swagger.errors.invalid('password'),
-				swagger.errors.invalid('user/password')
+				swagger.errors.invalid('user/password'),
+				{code : 400, 'message' : 'user unknow'}
 			]
 		},
 		'action': function (req, res) {
@@ -42,7 +43,7 @@ module.exports = function () {
 			var userSession = req.session.user;
 			if (userSession) {
 
-				return res.send(user);
+				return res.send(userSession);
 			} else {
 				User.authenticate(username, password, function (err, user) {
 					if (!err) {
@@ -52,10 +53,15 @@ module.exports = function () {
 
 						return res.send(userJson);
 					} else {
-						console.log(err);
+						var msg = 'Invalid user/password';
+						if ('code' in err) {
+							if (err.code === 101 || err.code === 102) {
+								msg = err.message;
+							}
+						}
 						return res.send({
 							'code' : 400,
-							'message' : 'Invalid user/password'
+							'message' : msg
 						}, 400);
 					}
 				});
@@ -66,7 +72,7 @@ module.exports = function () {
 
 
 	swagger.addModels({
-		'logoutResponse'  :{
+		'logoutResponse' : {
 			'required' : ['destroy'],
 			'properties' : {
 				'destroy' : {'type' : 'boolean'}
@@ -137,15 +143,15 @@ module.exports = function () {
 				if (!err) {
 					return res.send(user.toJson());
 				} else {
-					if("errors" in err) {
-						if("email" in err.errors) {
+					if ('errors' in err) {
+						if ('email' in err.errors) {
 							return res.send({
 								code : 400,
 								message : 'invalid email'
-							}, 400);	
+							}, 400);
 						}
 					} else {
-						if(err.code === 11000) {
+						if (err.code === 11000) {
 							return res.send({
 								code : 400,
 								message : 'invalid User allready exist'

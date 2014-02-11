@@ -13,7 +13,7 @@ module.exports = function () {
 			method: 'POST',
 			summary : 'Log into app with username/password',
 			notes : 'Returns an array info with id and username infos',
-			type : 'array',
+			type : 'User',
 			nickname : 'userLogin',
 			produces : ['application/json'],
 			parameters : [
@@ -27,7 +27,6 @@ module.exports = function () {
 			]
 		},
 		'action': function (req, res) {
-			var datas = {error: false};
 
 			var username = req.query.username,
 				password = req.query.password;
@@ -42,21 +41,18 @@ module.exports = function () {
 			// test user session
 			var userSession = req.session.user;
 			if (userSession) {
-				datas.sessionCreate = false;
-				datas.user = userSession;
 
-				return res.send(datas);
+				return res.send(user);
 			} else {
 				User.authenticate(username, password, function (err, user) {
 					if (!err) {
-						datas.sessionCreate = true;
-						req.session.user = datas.user = {
-							id : user.userid,
-							username : user.username,
-						};
+						
+						var userJson = user.toJson();
+						req.session.user = userJson;
 
-						return res.send(datas);
+						return res.send(userJson);
 					} else {
+						console.log(err);
 						return res.send({
 							'code' : 400,
 							'message' : 'Invalid user/password'
@@ -68,6 +64,15 @@ module.exports = function () {
 	};
 	swagger.addPost(userLogin);
 
+
+	swagger.addModels({
+		'logoutResponse'  :{
+			'required' : ['destroy'],
+			'properties' : {
+				'destroy' : {'type' : 'boolean'}
+			}
+		}
+	});
 	var userLogout = {
 		'spec': {
 			description : 'Log into application',
@@ -75,7 +80,7 @@ module.exports = function () {
 			method: 'GET',
 			summary : 'Logout from the app',
 			notes : 'Returns an array with session state',
-			type : 'array',
+			type : 'logoutResponse',
 			nickname : 'userLogout',
 			produces : ['application/json'],
 		},
@@ -83,7 +88,6 @@ module.exports = function () {
 			request.session.destroy(function () {
 			
 				return response.send({
-					error: false,
 					destroy: true
 				});
 			});
@@ -99,7 +103,7 @@ module.exports = function () {
 			method: 'POST',
 			summary : 'Register user',
 			notes : 'Returns an array info with id and username infos',
-			type : 'array',
+			type : 'User',
 			nickname : 'userRegister',
 			produces : ['application/json'],
 			parameters : [
@@ -131,14 +135,26 @@ module.exports = function () {
 
 			User.register(username, email, password, function (err, user) {
 				if (!err) {
-					return res.send({
-						username : user.username,
-						email : user.email
-					});
+					return res.send(user.toJson());
 				} else {
+					if("errors" in err) {
+						if("email" in err.errors) {
+							return res.send({
+								code : 400,
+								message : 'invalid email'
+							}, 400);	
+						}
+					} else {
+						if(err.code === 11000) {
+							return res.send({
+								code : 400,
+								message : 'invalid User allready exist'
+							}, 400);
+						}
+					}
 					return res.send({
 						code : 400,
-						message : "invalid User allready exist"
+						message : err.message
 					}, 400);
 				}
 			});

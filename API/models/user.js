@@ -1,5 +1,26 @@
 'use strict';
 
+var swagger = require('swagger-node-express');
+
+var swaggerModel = {
+	'User' : {
+		'required' : ['username', 'password', 'email'],
+		'properties' : {
+			'username' : {
+				'type' : 'string',
+				'description' : 'Unique User name'
+			},
+			'email' : {
+				'type' : 'email',
+				'description' : 'User email address'
+			}
+
+		}
+	}
+};
+swagger.addModels(swaggerModel);
+
+
 
 var mongoose = require('mongoose');
 var mongooseTypes = require('mongoose-types');
@@ -76,12 +97,18 @@ UserSchema.statics.authenticate = function (username, password, callback) {
 
         user.comparePassword(password, function (err, isMatch) {
 			if (err) {
-				return callback('Error check password');
+				return callback({
+					code : 102,
+					message : 'Invalid password'
+				});
 			} else {
 				if (isMatch) {
 					return callback(null, user);
 				} else {
-					return callback('Invalid password');
+					return callback({
+						code : 101, 
+						message : 'Invalid password'
+					});
 				}
 			}
         });
@@ -96,5 +123,12 @@ UserSchema.methods.comparePassword = function (candidatePassword, callback) {
         return callback(null, isMatch);
     });
 };
+
+UserSchema.methods.toJson = function() {
+	return {
+		username : this.username,
+		email : this.email
+	}
+}
 
 module.exports = mongoose.model('User', UserSchema);
